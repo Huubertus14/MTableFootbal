@@ -18,7 +18,7 @@ public class TableFootbalController extends Activity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         //Sensor shit
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
+        //Test Commit
         setContentView(new GamePanel(this, sensorManager));
 
     }
