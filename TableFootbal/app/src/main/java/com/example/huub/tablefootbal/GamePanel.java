@@ -1,6 +1,8 @@
 package com.example.huub.tablefootbal;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -14,6 +16,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import static com.example.huub.tablefootbal.MainThread.canvas;
+
 /**
  * Created by Huub on 15-2-2017.
  */
@@ -21,6 +25,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback, Se
     private MainThread thread;
     private Player player;
     private PointF playerPoint;
+    private PointF playerData;
+    private int playerID = 12345;
+
+    private Stick stick;
+    private Bitmap[] sticks = new Bitmap[3];
 
     private SensorManager sensorManager;
     private Sensor mySensor;
@@ -28,19 +37,28 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback, Se
     private float yRotation;
     private Point screenSize;
 
-    public GamePanel(Context context, SensorManager sensor){
+    public GamePanel(Context context, SensorManager sensor, int deviceWidth, int deviceHeight){
         super(context);
         getHolder().addCallback(this);
         thread = new MainThread(getHolder(),this);
 
+        getSticks();
+
+        stick = new Stick(new Rect(200,200,400,400), Color.BLACK, sticks, deviceWidth, deviceHeight);
         sensorManager = sensor;
         mySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         sensorManager.registerListener(this, mySensor, sensorManager.SENSOR_DELAY_GAME);
         setFocusable(true);
 
         //Init player
-        player = new Player(new Rect(200,200,400,400), Color.CYAN, new PointF(800,1600/2));
+        player = new Player(new Rect(200,200,400,400), Color.TRANSPARENT, new PointF(800,1600/2));
         playerPoint = new PointF(150,150);
+    }
+
+    private void getSticks() {
+        sticks[0] = BitmapFactory.decodeResource(getResources(), R.drawable.stick01);
+        sticks[1] = BitmapFactory.decodeResource(getResources(), R.drawable.stick02);
+        sticks[2] = BitmapFactory.decodeResource(getResources(), R.drawable.stick03);
     }
 
     @Override
@@ -92,7 +110,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback, Se
 
 
     public void update(){
+        playerData = player.getPosition();
+        System.out.println("ID: " + playerID + " Positions: X: " + playerData.x + " Y: " + playerData.y);
         player.update(playerPoint, yRotation);
+        stick.update(playerPoint.x - 100, player.getVelocity());
+
     }
 
     @Override
@@ -100,5 +122,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback, Se
         super.draw(canvas);
         canvas.drawColor(Color.WHITE);
         player.draw(canvas);
+        stick.draw(canvas);
+
     }
 }
